@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>India's Green Pulse — Vegetation Cover Atlas (2001–2023)</title>
+  <meta name="description" content="An interactive atlas mapping 22 years of vegetation cover change across India's 36 states using MODIS MOD44B satellite data from NASA.">
+  <meta name="author" content="Vaibhav Shivaji Nagare">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAV: brand left, open-map button right -->
+  <nav class="nav" id="main-nav">
+    <a href="#" class="nav-brand">India's Green Pulse</a>
+    <div class="nav-right">
+      <a href="https://vaibhav-gee-492304.projects.earthengine.app/view/modis-ndvi-animation" target="_blank" rel="noopener noreferrer" class="nav-btn" id="nav-map-btn">
+        Open Map in New Tab
+        <svg viewBox="0 0 12 12" fill="none"><path d="M4.5 1.5h-3v9h9v-3M7.5 1.5h3v3M6 6l4.5-4.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ====== HERO (Inversa mask-reveal) ====== -->
+  <section class="hero" id="hero">
+    <div class="hero-sticky">
+      <!-- Background image (scrolls via JS parallax) -->
+      <div class="hero-bg">
+        <img src="assets/hero.jpg" alt="Aerial drone view of dense vegetation alongside a river in India" id="hero-img" loading="eager">
+      </div>
+      <div class="hero-dark-overlay"></div>
+      <div class="hero-dot-grid"></div>
+
+      <!-- Mask wrapper (expands on scroll) -->
+      <div class="hero-mask" id="hero-mask">
+        <div class="hero-bg">
+          <img src="assets/hero.jpg" alt="" id="hero-img-mask" aria-hidden="true" loading="eager">
+        </div>
+        <div class="hero-dark-overlay"></div>
+      </div>
+
+      <!-- Slide 1 -->
+      <div class="hero-slide active" id="hs1">
+        <div class="hero-slide-inner">
+          <p class="hero-eyebrow">22 Years of Satellite Observation</p>
+          <h1 class="hero-h1">India's<br>Green Pulse</h1>
+          <p class="hero-desc">Tracking vegetation cover change across 36 states and union territories, from the Thar Desert to the Western Ghats, measured at 250-meter resolution by NASA's Terra satellite.</p>
+          <a href="#map-section" class="btn-lime">
+            Explore the Map
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="hero-slide" id="hs2">
+        <div class="hero-slide-inner">
+          <p class="hero-eyebrow">The Question</p>
+          <p class="hero-desc">Between 2001 and 2023, how did vegetation cover shift across India's diverse landscape? From the arid plains of Rajasthan to the dense forests of the Northeast, every state has its own trajectory written in satellite data.</p>
+          <div class="hero-big-num">+3.7%</div>
+          <p class="hero-big-cap">Average national vegetation cover increase over 22 years</p>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="hero-slide" id="hs3">
+        <div class="hero-slide-inner">
+          <p class="hero-eyebrow">The Lens</p>
+          <p class="hero-desc">This atlas uses MODIS MOD44B Vegetation Continuous Fields — a NASA satellite product at 250m resolution. Every pixel across India is classified into five categories for six snapshot years spanning two decades.</p>
+          <div class="year-tags">
+            <span class="year-tag">2001</span><span class="year-tag">2005</span><span class="year-tag">2010</span>
+            <span class="year-tag">2015</span><span class="year-tag">2020</span><span class="year-tag">2023</span>
+          </div>
+          <a href="#map-section" class="btn-lime">
+            See the Map
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M2 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Scroll progress -->
+      <div class="hero-prog" aria-hidden="true">
+        <div class="hero-prog-bar"><div class="hero-prog-fill" id="hero-prog-fill"></div></div>
+        <span class="hero-prog-label">Scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== MAP ====== -->
+  <section class="section" id="map-section">
+    <div class="wrap">
+      <div class="map-header rv">
+        <div>
+          <p class="section-eyebrow">The Map</p>
+          <h2 class="section-title">Vegetation Cover Across India</h2>
+          <p class="section-desc">The embedded Google Earth Engine App shows year-by-year vegetation cover classification. The animation auto-plays through 2001, 2005, 2010, 2015, 2020, and 2023. Use the app controls to pause, skip, or jump to a specific year.</p>
+        </div>
+      </div>
+      <div class="map-frame rv" id="map-frame">
+        <div class="map-loader" id="map-loader">
+          <div class="spinner"></div>
+          <span>Loading Earth Engine App…</span>
+        </div>
+        <iframe id="ee-iframe" src="https://vaibhav-gee-492304.projects.earthengine.app/view/modis-ndvi-animation" title="India Vegetation Cover Animation — Google Earth Engine App" allow="fullscreen" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== TABS CARD ====== -->
+  <section class="section" id="tabs-section">
+    <div class="wrap">
+      <div class="tabs-card rv" id="tabs-card">
+
+        <!-- Tab bar -->
+        <div class="tabs-bar" role="tablist">
+          <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="p-method" id="t-method">Data &amp; Methodology</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="p-data" id="t-data">The Data</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="p-findings" id="t-findings">The Findings</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="p-sources" id="t-sources">Sources &amp; Citations</button>
+        </div>
+
+        <!-- ▸ Panel 1: Data & Methodology -->
+        <div class="tab-body">
+          <div class="tab-panel active" id="p-method" role="tabpanel" aria-labelledby="t-method">
+            <h3 class="section-title" style="font-size:clamp(22px,3vw,34px);margin-bottom:24px">About This Dataset</h3>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-lbl" style="margin-bottom:14px">Dataset</div>
+                <p class="interp-text" style="font-size:15px">MODIS/061/MOD44B — Version 6.1 Vegetation Continuous Fields from NASA's Terra satellite. 250-meter spatial resolution, annual composites available from 2000 to present.</p>
+              </div>
+              <div class="stat-card">
+                <div class="stat-lbl" style="margin-bottom:14px">Study Parameters</div>
+                <p class="interp-text" style="font-size:15px">Study area: India (36 states and UTs). Years analysed: 2001, 2005, 2010, 2015, 2020, 2023. Variable: Total vegetation cover (computed as 100 − Percent_NonVegetated). Classification: 5 classes from Very Low (0–20%) to Very High (80–100%).</p>
+              </div>
+              <div class="stat-card">
+                <div class="stat-lbl" style="margin-bottom:14px">Processing</div>
+                <p class="interp-text" style="font-size:15px">Platform: Google Earth Engine. Statistics: Area-weighted mean per state using pixel area to account for latitude-dependent pixel size. Masking: Valid range 0–100 only; fill value 200 excluded. Boundary: Survey of India state-level layer.</p>
+              </div>
+            </div>
+            <div class="meth-note" style="margin-top:32px">
+              <strong>Methodology note:</strong> Only valid-range masking (0–100) was applied. Quality-band masking was deliberately not used because no single documented standard procedure exists for post-hoc QA bit-masking on the MOD44B product. This is a conscious, documented decision — not an oversight.
+            </div>
+          </div>
+
+          <!-- ▸ Panel 2: The Data -->
+          <div class="tab-panel" id="p-data" role="tabpanel" aria-labelledby="t-data">
+
+            <!-- State Explorer -->
+            <h3 class="section-title" style="font-size:clamp(22px,3vw,34px);margin-bottom:8px">State Explorer</h3>
+            <p class="section-desc">Each bar represents one year. The five coloured segments show what share of the state falls into each vegetation cover class. Hover or tap for exact percentages.</p>
+
+            <div class="sel-wrap">
+              <label class="sel-label" for="state-sel">Select State</label>
+              <select class="sel-drop" id="state-sel"></select>
+            </div>
+            <div class="legend" id="chart-legend"></div>
+            <div class="chart-area" id="stacked-wrap">
+              <canvas id="stacked-chart"></canvas>
+            </div>
+
+            <!-- National Trends -->
+            <h3 class="section-title" style="font-size:clamp(22px,3vw,34px);margin-top:48px;margin-bottom:8px">National Trends</h3>
+            <p class="section-desc">The national average vegetation cover across all 36 states, plotted for each study year. The upward trend confirms India's net greening over this period.</p>
+            <div class="chart-area" id="trends-wrap">
+              <canvas id="trends-chart"></canvas>
+            </div>
+
+            <h4 style="font-family:var(--mono);font-size:13px;color:var(--lime);text-transform:uppercase;font-weight:300;margin:32px 0 18px">Top Gainers &amp; Decliners</h4>
+            <div class="spark-grid" id="spark-grid"></div>
+
+            <!-- State Rankings -->
+            <h3 class="section-title" style="font-size:clamp(22px,3vw,34px);margin-top:48px;margin-bottom:8px">State Rankings</h3>
+            <p class="section-desc">All 36 states sorted by vegetation cover change. Click any column header to re-sort.</p>
+            <div class="tbl-wrap">
+              <table class="tbl" id="rank-tbl">
+                <thead><tr>
+                  <th data-sort="state">State</th>
+                  <th data-sort="2001">2001 (%)</th>
+                  <th data-sort="2023">2023 (%)</th>
+                  <th data-sort="change">Change</th>
+                </tr></thead>
+                <tbody id="rank-body"></tbody>
+              </table>
+            </div>
+            <button class="show-more-btn" id="show-more-btn">Show All States</button>
+          </div>
+
+          <!-- ▸ Panel 3: The Findings -->
+          <div class="tab-panel" id="p-findings" role="tabpanel" aria-labelledby="t-findings">
+            <h3 class="section-title" style="font-size:clamp(22px,3vw,34px);margin-bottom:24px">What Changed</h3>
+
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-val">76.9%</div>
+                <div class="stat-lbl">National Avg. 2001</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val">80.6%</div>
+                <div class="stat-lbl">National Avg. 2023</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" style="color:var(--lime)">+3.7</div>
+                <div class="stat-lbl">Percentage Points Gained</div>
+              </div>
+            </div>
+
+            <div class="interp-text">
+              <p>Between 2001 and 2023, the average vegetation cover across India's 36 states and union territories rose from 76.9% to 80.6%, a gain of 3.7 percentage points. This net increase was not uniform across the country.</p>
+              <p>The five states with the largest gains were <strong>Jharkhand (+10.1 points)</strong>, <strong>Gujarat (+9.1)</strong>, <strong>Bihar (+9.0)</strong>, <strong>Uttar Pradesh (+8.8)</strong>, and <strong>Rajasthan (+8.4)</strong>. These are all in central and northern India. In each of these states, the "Very High" vegetation class expanded significantly at the expense of the "High" and "Moderate" classes, indicating a measurable shift toward denser cover.</p>
+              <p>A small number of states showed declines, all with smaller magnitudes. <strong>Lakshadweep (−4.6 points)</strong>, <strong>Andaman &amp; Nicobar (−1.7)</strong>, and <strong>Manipur (−1.3)</strong> saw the largest decreases. These are small island territories and a northeastern state where factors such as cyclone damage and shifting cultivation patterns may play a role.</p>
+              <p>The data shows spatial patterns but does not explain causes. The MOD44B product measures vegetation cover percentage, not the reasons for change. It would be inaccurate to attribute the observed shifts to any specific driver — such as afforestation policy, irrigation expansion, or climate change — without supporting evidence from other datasets.</p>
+            </div>
+
+            <div class="meth-note">
+              <strong>Interpretation caveat:</strong> All findings are observational. Vegetation cover percentage is a physical measurement derived from satellite reflectance. No causal inference is made or implied. The trends described above should be treated as starting points for further investigation, not as conclusions.
+            </div>
+          </div>
+
+          <!-- ▸ Panel 4: Sources & Citations -->
+          <div class="tab-panel" id="p-sources" role="tabpanel" aria-labelledby="t-sources">
+            <h3 class="section-title" style="font-size:clamp(22px,3vw,34px);margin-bottom:24px">Sources &amp; Citations</h3>
+
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-lbl" style="margin-bottom:14px">Primary Data Source</div>
+                <p class="interp-text" style="font-size:15px">DiMiceli, C., et al. (2022). MODIS/Terra Vegetation Continuous Fields Yearly L3 Global 250m SIN Grid V061 [Data set]. NASA EOSDIS Land Processes Distributed Active Archive Center.</p>
+                <a href="https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MOD44B" target="_blank" rel="noopener noreferrer" class="nav-btn" style="margin-top:16px;font-size:11px;padding:6px 12px">
+                  GEE Catalog Page
+                  <svg viewBox="0 0 12 12" fill="none" style="width:10px;height:10px"><path d="M4.5 1.5h-3v9h9v-3M7.5 1.5h3v3M6 6l4.5-4.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+              <div class="stat-card">
+                <div class="stat-lbl" style="margin-bottom:14px">Boundary Data</div>
+                <p class="interp-text" style="font-size:15px">State boundary polygons: Survey of India administrative boundary dataset, uploaded as a GEE asset. Only the statistical CSV derived from zonal analysis is stored in this repository. No MODIS rasters or boundary shapefiles are included.</p>
+              </div>
+              <div class="stat-card">
+                <div class="stat-lbl" style="margin-bottom:14px">Acknowledgements</div>
+                <p class="interp-text" style="font-size:15px">Data processed on Google Earth Engine. MODIS MOD44B V6.1 provided by NASA/USGS via the LP DAAC. Course: Geospatial Big Data Analysis, Bharati Vidyapeeth Institute of Environment Education and Research, Pune. Course Coordinator: Dr. Aravinth R.</p>
+              </div>
+            </div>
+
+            <div class="meth-note" style="margin-top:32px">
+              <strong>Data rule:</strong> Only the statistical CSV is stored in this repository. No MODIS rasters or boundary shapefiles are distributed. All geospatial computation was performed server-side in Google Earth Engine; no satellite imagery was downloaded locally.
+            </div>
+          </div>
+        </div><!-- /tab-body -->
+
+      </div><!-- /tabs-card -->
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer" id="footer">
+    <div class="wrap">
+      <div class="footer-inner">
+        <span class="footer-name">Vaibhav Shivaji Nagare</span>
+        <div class="footer-social">
+          <a href="https://www.linkedin.com/in/vaibhav-nagare-gis" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://github.com/VaibhavNagare-GIS" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
+            <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
