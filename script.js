@@ -1,5 +1,5 @@
 /* ============================================================
-   India Vegetation Cover Atlas — Script v2
+   India Vegetation Cover Atlas — Script v3
    Zero dependencies beyond Chart.js + PapaParse (CDN)
    ============================================================ */
 (function () {
@@ -25,92 +25,69 @@
   var showAllRankings = false;
 
   /* ============================================================
-     1. NAV — scroll background
+     1. NAV
      ============================================================ */
   function initNav() {
-    var nav = document.getElementById('main-nav');
-    if (!nav) return;
-    window.addEventListener('scroll', function () {
-      nav.classList.toggle('scrolled', window.scrollY > 60);
-    }, { passive: true });
+    /* Nav is a solid ink bar at all scroll positions in this
+       design, so no scroll-based class toggling is needed. */
   }
 
   /* ============================================================
-     2. HERO — Inversa mask-reveal + parallax + slides
+     2. HERO — before/after compare frame (hover on desktop,
+        tap/click on touch and keyboard)
      ============================================================ */
-  function initHero() {
-    var hero = document.getElementById('hero');
-    var mask = document.getElementById('hero-mask');
-    var img = document.getElementById('hero-img');
-    var imgMask = document.getElementById('hero-img-mask');
-    var progFill = document.getElementById('hero-prog-fill');
-    var slides = [
-      document.getElementById('hs1'),
-      document.getElementById('hs2'),
-      document.getElementById('hs3')
-    ];
-    if (!hero || !mask) return;
+  function initCompare() {
+    var frame = document.getElementById('compare-frame');
+    if (!frame) return;
 
-    var totalSlides = slides.length;
+    function toggle() { frame.classList.toggle('js-active'); }
 
-    function tick() {
-      var rect = hero.getBoundingClientRect();
-      var heroH = hero.offsetHeight;
-      var vh = window.innerHeight;
-      var scrolled = Math.max(0, -rect.top);
-      var range = heroH - vh;
-      var p = Math.min(1, Math.max(0, scrolled / range));
-
-      /* Progress bar */
-      if (progFill) progFill.style.height = (p * 100) + '%';
-
-      /* Parallax image — moves up slowly */
-      var imgY = -(p * 25); // 25% shift over full scroll
-      if (img) img.style.transform = 'translateY(' + imgY + '%) scale(' + (1 + p * 0.06) + ')';
-      if (imgMask) imgMask.style.transform = 'translateY(' + imgY + '%) scale(' + (1 + p * 0.06) + ')';
-
-      /* Mask expansion: starts at ~90vw, expands to fill viewport */
-      var maskProgress = Math.min(1, p * 3); // expand in first 33% of scroll
-      var startW = 88, endW = 220;
-      var startH = 80, endH = 220;
-      var w = startW + (endW - startW) * easeOutQuart(maskProgress);
-      var h = startH + (endH - startH) * easeOutQuart(maskProgress);
-      mask.style.webkitMaskSize = w + 'vw ' + h + 'vh';
-      mask.style.maskSize = w + 'vw ' + h + 'vh';
-
-      /* Slide transitions */
-      var seg = 1 / totalSlides;
-      var activeIdx = Math.min(totalSlides - 1, Math.floor(p / seg));
-      for (var i = 0; i < totalSlides; i++) {
-        if (slides[i]) {
-          slides[i].classList.toggle('active', i === activeIdx);
-        }
-      }
-    }
-
-    window.addEventListener('scroll', tick, { passive: true });
-    tick();
-  }
-
-  function easeOutQuart(t) {
-    return 1 - Math.pow(1 - t, 4);
+    frame.addEventListener('click', toggle);
+    frame.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
   }
 
   /* ============================================================
-     3. REVEAL ON SCROLL
+     3. REVEAL ON SCROLL + NUMBER COUNT-UP
      ============================================================ */
   function initReveal() {
     var els = document.querySelectorAll('.rv');
-    if (!els.length) return;
+    var counters = document.querySelectorAll('[data-count-to]');
+    if (!els.length && !counters.length) return;
+
     var obs = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
-        if (entries[i].isIntersecting) {
-          entries[i].target.classList.add('vis');
-          obs.unobserve(entries[i].target);
-        }
+        if (!entries[i].isIntersecting) continue;
+        var target = entries[i].target;
+        target.classList.add('vis');
+        if (target.hasAttribute('data-count-to')) animateCount(target);
+        obs.unobserve(target);
       }
-    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    }, { threshold: 0.2, rootMargin: '0px 0px -20px 0px' });
+
     for (var j = 0; j < els.length; j++) obs.observe(els[j]);
+    for (var k = 0; k < counters.length; k++) obs.observe(counters[k]);
+  }
+
+  function animateCount(el) {
+    var to = parseFloat(el.getAttribute('data-count-to'));
+    var prefix = el.getAttribute('data-prefix') || '';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var decimals = (el.getAttribute('data-count-to').split('.')[1] || '').length;
+    var duration = 900;
+    var start = null;
+
+    function frame(ts) {
+      if (!start) start = ts;
+      var t = Math.min(1, (ts - start) / duration);
+      var eased = 1 - Math.pow(1 - t, 3);
+      var val = to * eased;
+      el.textContent = prefix + val.toFixed(decimals) + suffix;
+      if (t < 1) requestAnimationFrame(frame);
+      else el.textContent = prefix + to.toFixed(decimals) + suffix;
+    }
+    requestAnimationFrame(frame);
   }
 
   /* ============================================================
@@ -155,6 +132,30 @@
             buildRankings();
           }
         }
+      });
+    }
+  }
+
+  /* ============================================================
+     5B. SUB-TABS (inside "Explore the Data")
+     ============================================================ */
+  function initSubtabs() {
+    var btns = document.querySelectorAll('.subtab-btn');
+    var panels = document.querySelectorAll('.subtab-panel');
+    if (!btns.length) return;
+
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function () {
+        var id = this.getAttribute('aria-controls');
+        for (var j = 0; j < btns.length; j++) {
+          btns[j].classList.remove('active');
+          btns[j].setAttribute('aria-selected', 'false');
+        }
+        for (var k = 0; k < panels.length; k++) panels[k].classList.remove('active');
+        this.classList.add('active');
+        this.setAttribute('aria-selected', 'true');
+        var target = document.getElementById(id);
+        if (target) target.classList.add('active');
       });
     }
   }
@@ -266,7 +267,7 @@
         label: CLASS_LABELS[c],
         data: rows.map(function (r) { var v = r[CLASS_KEYS[c]]; return v != null ? parseFloat(v.toFixed(2)) : 0; }),
         backgroundColor: CLASS_COLORS[c],
-        borderColor: 'rgba(14,15,10,0.5)',
+        borderColor: 'rgba(18,18,18,0.55)',
         borderWidth: 1,
         borderRadius: 2,
         barPercentage: 0.6,
@@ -285,10 +286,10 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(14,15,10,0.95)', titleColor: '#f4f3e8', bodyColor: '#f4f3e8',
-            borderColor: '#404040', borderWidth: 1,
-            titleFont: { family: 'JetBrains Mono', size: 13 },
-            bodyFont: { family: 'JetBrains Mono', size: 12 },
+            backgroundColor: 'rgba(18,18,18,0.95)', titleColor: '#FFF7E6', bodyColor: '#FFF7E6',
+            borderColor: '#121212', borderWidth: 2,
+            titleFont: { family: 'Space Mono', size: 13, weight: '700' },
+            bodyFont: { family: 'Space Mono', size: 12 },
             padding: 14, cornerRadius: 4,
             callbacks: {
               title: function (items) { return titleCase(state) + ' — ' + items[0].label; },
@@ -307,17 +308,17 @@
         scales: {
           x: {
             stacked: true,
-            grid: { color: 'rgba(64,64,64,0.15)', drawBorder: false },
-            ticks: { color: '#84837b', font: { family: 'JetBrains Mono', size: 12 } },
+            grid: { color: 'rgba(18,18,18,0.1)', drawBorder: false },
+            ticks: { color: '#6B675F', font: { family: 'Space Mono', size: 12 } },
             border: { display: false },
-            title: { display: true, text: 'Year', color: '#84837b', font: { family: 'JetBrains Mono', size: 12, weight: '300' } }
+            title: { display: true, text: 'Year', color: '#6B675F', font: { family: 'Space Mono', size: 11, weight: '700' } }
           },
           y: {
             stacked: true, min: 0, max: 100,
-            grid: { color: 'rgba(64,64,64,0.12)', drawBorder: false },
-            ticks: { color: '#84837b', font: { family: 'JetBrains Mono', size: 11 }, callback: function (v) { return v + '%'; }, stepSize: 20 },
+            grid: { color: 'rgba(18,18,18,0.07)', drawBorder: false },
+            ticks: { color: '#6B675F', font: { family: 'Space Mono', size: 11 }, callback: function (v) { return v + '%'; }, stepSize: 20 },
             border: { display: false },
-            title: { display: true, text: 'Percentage of State Area', color: '#84837b', font: { family: 'JetBrains Mono', size: 12, weight: '300' } }
+            title: { display: true, text: 'Percentage of State Area', color: '#6B675F', font: { family: 'Space Mono', size: 11, weight: '700' } }
           }
         },
         animation: { duration: 500, easing: 'easeOutQuart' }
@@ -340,8 +341,8 @@
         datasets: [{
           label: 'National Average Vegetation Cover',
           data: avgs.map(function (v) { return parseFloat(v.toFixed(2)); }),
-          borderColor: '#ebfc72', backgroundColor: 'rgba(235,252,114,0.07)',
-          pointBackgroundColor: '#ebfc72', pointBorderColor: '#0e0f0a', pointBorderWidth: 2,
+          borderColor: '#35B24A', backgroundColor: 'rgba(53,178,74,0.14)',
+          pointBackgroundColor: '#35B24A', pointBorderColor: '#FFF7E6', pointBorderWidth: 2,
           pointRadius: 6, pointHoverRadius: 8, borderWidth: 2.5, tension: 0.3, fill: true
         }]
       },
@@ -350,27 +351,27 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(14,15,10,0.95)', titleColor: '#f4f3e8', bodyColor: '#ebfc72',
-            borderColor: '#404040', borderWidth: 1,
-            titleFont: { family: 'JetBrains Mono', size: 13 },
-            bodyFont: { family: 'JetBrains Mono', size: 14 },
+            backgroundColor: 'rgba(18,18,18,0.95)', titleColor: '#FFF7E6', bodyColor: '#FFC93C',
+            borderColor: '#121212', borderWidth: 2,
+            titleFont: { family: 'Space Mono', size: 13, weight: '700' },
+            bodyFont: { family: 'Space Mono', size: 14, weight: '700' },
             padding: 14, cornerRadius: 4,
             callbacks: { label: function (item) { return 'Avg. Cover: ' + item.raw.toFixed(1) + '%'; } }
           }
         },
         scales: {
           x: {
-            grid: { color: 'rgba(64,64,64,0.15)', drawBorder: false },
-            ticks: { color: '#84837b', font: { family: 'JetBrains Mono', size: 12 } },
+            grid: { color: 'rgba(18,18,18,0.1)', drawBorder: false },
+            ticks: { color: '#6B675F', font: { family: 'Space Mono', size: 12 } },
             border: { display: false },
-            title: { display: true, text: 'Year', color: '#84837b', font: { family: 'JetBrains Mono', size: 12, weight: '300' } }
+            title: { display: true, text: 'Year', color: '#6B675F', font: { family: 'Space Mono', size: 11, weight: '700' } }
           },
           y: {
             min: 70, max: 90,
-            grid: { color: 'rgba(64,64,64,0.12)', drawBorder: false },
-            ticks: { color: '#84837b', font: { family: 'JetBrains Mono', size: 11 }, callback: function (v) { return v + '%'; } },
+            grid: { color: 'rgba(18,18,18,0.07)', drawBorder: false },
+            ticks: { color: '#6B675F', font: { family: 'Space Mono', size: 11 }, callback: function (v) { return v + '%'; } },
             border: { display: false },
-            title: { display: true, text: 'National Average Vegetation Cover (%)', color: '#84837b', font: { family: 'JetBrains Mono', size: 12, weight: '300' } }
+            title: { display: true, text: 'National Average Vegetation Cover (%)', color: '#6B675F', font: { family: 'Space Mono', size: 11, weight: '700' } }
           }
         },
         animation: { duration: 700, easing: 'easeOutQuart' }
@@ -413,7 +414,7 @@
 
       var val = document.createElement('div');
       val.className = 'spark-value ' + (d.change >= 0 ? 'pos' : 'neg');
-      val.style.color = d.change >= 0 ? 'var(--lime)' : 'var(--red-soft)';
+      val.style.color = d.change >= 0 ? '#1F8A38' : '#D6402A';
       val.textContent = (d.change >= 0 ? '+' : '') + d.change.toFixed(1) + '%';
 
       var cvs = document.createElement('canvas');
@@ -436,7 +437,7 @@
     var rng = mx - mn || 1;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
-    ctx.strokeStyle = isPos ? '#ebfc72' : '#e06050';
+    ctx.strokeStyle = isPos ? '#1F8A38' : '#D6402A';
     ctx.lineWidth = 1.5;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -452,7 +453,7 @@
       var dy = h - pad - ((values[idx] - mn) / rng) * (h - 2 * pad);
       ctx.beginPath();
       ctx.arc(dx, dy, 3, 0, Math.PI * 2);
-      ctx.fillStyle = isPos ? '#ebfc72' : '#e06050';
+      ctx.fillStyle = isPos ? '#1F8A38' : '#D6402A';
       ctx.fill();
     });
   }
@@ -548,10 +549,11 @@
      ============================================================ */
   function init() {
     initNav();
-    initHero();
+    initCompare();
     initReveal();
     initMap();
     initTabs();
+    initSubtabs();
     initRankSort();
     loadData();
   }
