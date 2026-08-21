@@ -20,7 +20,7 @@
 <br>
 
 <div align="center">
-  <img src="assets/webpage.png" alt="GreenWatch India hero section screenshot" width="100%">
+  <img src="assets/Webpage.png" alt="GreenWatch India hero section screenshot" width="100%">
 </div>
 
 <br>
