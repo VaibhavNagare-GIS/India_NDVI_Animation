@@ -141,7 +141,6 @@ State boundary polygons: Survey of India administrative boundary dataset, upload
 ## Author
 
 **Vaibhav Shivaji Nagare**
-Geospatial Big Data Analysis, Bharati Vidyapeeth Institute of Environment Education and Research, Pune
 
 [![LinkedIn](https://img.shields.io/badge/Connect%20on%20LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vaibhav-nagare-gis)
 [![GitHub](https://img.shields.io/badge/Follow%20on%20GitHub-111111?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VaibhavNagare-GIS)
