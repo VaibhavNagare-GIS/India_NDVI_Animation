@@ -15,9 +15,6 @@
 [![Chart.js](https://img.shields.io/badge/CHART.JS-F0298B?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 [![Google Earth Engine](https://img.shields.io/badge/GOOGLE%20EARTH%20ENGINE-35B24A?style=for-the-badge&logoColor=white)](https://earthengine.google.com/)
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vaibhav-nagare-gis)
-[![GitHub](https://img.shields.io/badge/GitHub-111111?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VaibhavNagare-GIS)
-
 </div>
 
 <br>
